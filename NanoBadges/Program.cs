@@ -54,11 +54,6 @@ app.MapGet("/nano-badge/{text?}/{title?}/{color?}/{titleColor?}/{font?}", (HttpR
     }
     TimeSpan sinceLastRequest = DateTime.Now - (requests[clientAddress].LastOrDefault() ?? DateTime.MinValue);
     requests[clientAddress].Add(DateTime.Now);
-    if (sinceLastRequest.TotalSeconds < 5)
-    {
-        app.Logger.LogError(message);
-        return Results.BadRequest("Too many requests");
-    }
     if (sinceLastRequest.TotalMinutes < 10)
     {
         app.Logger.LogWarning(message);
