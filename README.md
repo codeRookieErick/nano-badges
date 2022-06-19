@@ -40,6 +40,6 @@ The valid colors are:
 
 |value|title|value-background|title-background|font-name| result|
 |---|---|---|---|---|---|
-|34|quantity|red|gray|candara|![](./examples/34-quantity-red-gray-candara.png)|
-|1.0.0 [beta]|version|gray|blue|arial|![](./examples/1.0.0%5Bbeta%5D-version-gray-mustard-arial.png)|
+|34|Quantity|red|gray|candara|![](./examples/34-quantity-red-gray-candara.png)|
+|1.0.0 [beta]|version_number|gray|blue|arial|![](./examples/1.0.0%5Bbeta%5D-version-gray-mustard-arial.png)|
 |default|||||![](./examples/default.png)|
