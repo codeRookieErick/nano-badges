@@ -25,6 +25,9 @@ int port = 8090;
 if(args.Length > 0 && int.TryParse(args[0], out port)) { }
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 
 var app = builder.Build();
 Dictionary<string, Color> colors = new Dictionary<string, Color>
@@ -39,8 +42,33 @@ Dictionary<string, Color> colors = new Dictionary<string, Color>
     {"gray", new Color(30, 30, 30) }
 };
 
-app.MapGet("/nano-badge/{text?}/{title?}/{color?}/{titleColor?}/{font?}", (string? text, string? title, string? color, string? titleColor, string? font) =>
+Dictionary<string, List<DateTime?>> requests = new();
+
+app.MapGet("/nano-badge/{text?}/{title?}/{color?}/{titleColor?}/{font?}", (HttpRequest req, string? text, string? title, string? color, string? titleColor, string? font) =>
 {
+    string clientAddress = req.HttpContext.Connection.RemoteIpAddress?.ToString() ?? String.Empty;
+    string message = $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}] Request from {clientAddress}";
+    if (!requests.ContainsKey(clientAddress))
+    {
+        requests[clientAddress] = new List<DateTime?>();
+    }
+    TimeSpan sinceLastRequest = DateTime.Now - (requests[clientAddress].LastOrDefault() ?? DateTime.MinValue);
+    requests[clientAddress].Add(DateTime.Now);
+    if (sinceLastRequest.TotalSeconds < 5)
+    {
+        app.Logger.LogError(message);
+        return Results.BadRequest("Too many requests");
+    }
+    if (sinceLastRequest.TotalMinutes < 10)
+    {
+        app.Logger.LogWarning(message);
+    }
+    else
+    {
+        app.Logger.LogInformation(message);
+    }
+
+
     color = color ?? "blue";
     titleColor = titleColor ?? "gray";
     font = (font ?? "candara").Replace("_", " ");
@@ -60,5 +88,5 @@ app.MapGet("/nano-badge/{text?}/{title?}/{color?}/{titleColor?}/{font?}", (strin
 });
 
 app.MapGet("/colors", () => colors.Keys.ToList());
-
-app.Run($"http://localhost:{port}");
+string url = $"http://localhost:{port}";
+app.Run(url);
